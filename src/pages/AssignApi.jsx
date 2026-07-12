@@ -10,6 +10,9 @@ function AssignApi({ user, apiCollections, assignedApis, setAssignedApis, setAct
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [permission, setPermission] = useState("View Only");
+  const [showEditModal, setShowEditModal] = useState(false);
+const [editingAssignment, setEditingAssignment] = useState(null);
+const [editPermission, setEditPermission] = useState("View Only");
 
   useEffect(() => {
     localStorage.setItem(
@@ -182,7 +185,25 @@ setPermission("View Only");
           <h3>{user?.name}</h3>
           <p><b>API:</b> {api?.name}</p>
           <p><b>Permission:</b> {item.permission}</p>
+        <div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginTop: "15px",
+  }}
+>
+  <button
+    className="assign-permission-edit-btn"
+    onClick={() => {
+      setEditingAssignment(item);
+      setEditPermission(item.permission);
+      setShowEditModal(true);
+    }}
+  >
+    Edit Permission
+  </button>
 
+</div>
          <button
   className="delete-btn"
   onClick={() => {
@@ -274,6 +295,102 @@ setShowDeleteModal(false);
         >
           Remove
         </button>
+      </div>
+    </div>
+  </div>
+)}
+{showEditModal && editingAssignment && (
+  <div className="modal-overlay">
+    <div className="delete-modal">
+
+      <h3>Edit API Permission</h3>
+
+      <p>
+        Change the access permission for this API assignment.
+      </p>
+
+      <select
+        className="custom-select"
+        value={editPermission}
+        onChange={(e) =>
+          setEditPermission(e.target.value)
+        }
+        style={{
+          width: "100%",
+          marginTop: "15px",
+          marginBottom: "20px",
+        }}
+      >
+        <option>View Only</option>
+        <option>Editor</option>
+        <option>Full Access</option>
+      </select>
+
+      <div className="modal-buttons">
+
+        <button
+          className="cancel-btn"
+          onClick={() => {
+            setShowEditModal(false);
+            setEditingAssignment(null);
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="permission-save-changes-btn"
+          onClick={() => {
+            const updatedAssignments =
+              assignedApis.map((a) =>
+                a.id === editingAssignment.id
+                  ? {
+                      ...a,
+                      permission: editPermission,
+                    }
+                  : a
+              );
+
+            setAssignedApis(updatedAssignments);
+
+            localStorage.setItem(
+              "assignedApis",
+              JSON.stringify(updatedAssignments)
+            );
+
+            const editedApi = apiCollections.find(
+              (api) =>
+                api.id === editingAssignment.apiId
+            );
+
+            const editedUser = users.find(
+              (u) =>
+                u.email === editingAssignment.userEmail
+            );
+
+            setActivities((prev) => [
+              {
+                id: Date.now(),
+                message: `${editedApi?.name} permission changed to ${editPermission} for ${editedUser?.name}`,
+                time: new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              },
+              ...prev,
+            ]);
+
+            toast.success(
+              `Permission updated to ${editPermission}!`
+            );
+
+            setShowEditModal(false);
+            setEditingAssignment(null);
+          }}
+        >
+          Save Changes
+        </button>
+
       </div>
     </div>
   </div>

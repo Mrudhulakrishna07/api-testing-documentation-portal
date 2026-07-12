@@ -41,11 +41,16 @@ if (!users || users.length === 0) {
   localStorage.setItem("users", JSON.stringify(users));
 }
   
-  const foundUser = users.find(
-    (user) =>
-      user.email === email &&
-      user.password === password
-  );
+ const foundUser = users.find(
+  (user) =>
+    user.email === email &&
+    user.password === password
+);
+
+if (!foundUser) {
+  toast.error("Invalid email or password.");
+  return;
+}
 const updatedUsers = users.map((u) =>
   u.email === foundUser.email
     ? {

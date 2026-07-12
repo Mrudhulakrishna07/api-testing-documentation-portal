@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 function EditCollection({
   apiCollections,
   setApiCollections,
+  setActivities,
 }) {
     console.log(import.meta.env.VITE_GEMINI_API_KEY);
   const navigate = useNavigate();
@@ -19,11 +20,11 @@ function EditCollection({
   const [provider, setProvider] = useState("");
   const [endpointUrl, setEndpointUrl] = useState("");
   const [model, setModel] = useState("");
-  const [apiKey, setApiKey] = useState("");
+  
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("");
 
-  const [showApiKey, setShowApiKey] = useState(false);
+  
 
   useEffect(() => {
     if (!collection) return;
@@ -32,7 +33,6 @@ function EditCollection({
     setProvider(collection.provider);
     setEndpointUrl(collection.endpointUrl);
     setModel(collection.model);
-    setApiKey(collection.apiKey);
     setDescription(collection.description);
     setStatus(collection.status);
   }, [collection]);
@@ -107,39 +107,7 @@ function EditCollection({
             }
           />
 
-          <label>API Key</label>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "10px",
-            }}
-          >
-
-            <input
-              type={
-                showApiKey
-                  ? "text"
-                  : "password"
-              }
-              value={apiKey}
-              onChange={(e) =>
-                setApiKey(e.target.value)
-              }
-            />
-
-            <button
-              className="collection-btn"
-              onClick={() =>
-                setShowApiKey(!showApiKey)
-              }
-            >
-              {showApiKey
-                ? "Hide"
-                : "Show"}
-            </button>
-
-          </div>
+  
 
           <label>Description</label>
 
@@ -168,47 +136,6 @@ function EditCollection({
           <div
             style={{
               display: "flex",
-              gap: "12px",
-              marginTop: "20px",
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              className="collection-btn"
-              onClick={() => {
-                if (!apiKey) {
-                  toast.error("No API key available.");
-                  return;
-                }
-
-                navigator.clipboard.writeText(apiKey);
-                toast.success("API Key copied!");
-              }}
-            >
-              Copy API Key
-            </button>
-
-            <button
-  className="collection-btn"
-  onClick={async () => {
-    toast.info("Testing Gemini API connection...");
-
-    const result = await testGeminiConnection();
-
-    if (result === "Connection Successful") {
-      toast.success("Gemini API connected successfully!");
-    } else {
-      toast.error("Failed to connect to Gemini API.");
-    }
-  }}
->
-  Test Connection
-</button>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
               gap: "15px",
               marginTop: "30px",
             }}
@@ -225,7 +152,6 @@ function EditCollection({
                           provider,
                           endpointUrl,
                           model,
-                          apiKey,
                           description,
                           status,
                         }
@@ -236,7 +162,7 @@ function EditCollection({
                   setActivities((prev) => [
   {
     id: Date.now(),
-    message: `${name} created`,
+    message: `${name} updated`,
     time: new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",

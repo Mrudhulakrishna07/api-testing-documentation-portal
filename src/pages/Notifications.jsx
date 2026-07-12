@@ -53,7 +53,7 @@ const [selectedNotification, setSelectedNotification] =
       </button>
     </div>
   )}
-
+      <div className="notifications-scroll-box">
         {notifications.length === 0 ? (
 
           <p
@@ -176,7 +176,7 @@ const [selectedNotification, setSelectedNotification] =
           ))}
           </div>
         )}
-
+      </div>
       </div>
       <DeleteModal
   isOpen={showDeleteModal}

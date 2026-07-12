@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import DeleteModal from "../components/DeleteModal"
 function Collections({ user,apiCollections, setApiCollections,search, setActivities }) {
   const navigate = useNavigate();
   const assignedApis =
   JSON.parse(localStorage.getItem("assignedApis")) || [];
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
 const [selectedId, setSelectedId] = useState(null);
+const [showKeys, setShowKeys] = useState({});
   const userApis =
   user?.role === "Admin"
     ? apiCollections
@@ -48,7 +49,33 @@ console.log(filteredCollections);
   ]);
 };
 
+const generateApiKey = (apiId) => {
+  const currentAssignments =
+    JSON.parse(localStorage.getItem("assignedApis")) || [];
 
+  const generatedKey =
+    "api_" +
+    crypto.randomUUID().replaceAll("-", "");11111111
+
+  const updatedAssignments = currentAssignments.map((assignment) =>
+    assignment.userEmail === user.email &&
+    assignment.apiId === apiId
+      ? {
+          ...assignment,
+          apiKey: generatedKey,
+        }
+      : assignment
+  );
+
+  localStorage.setItem(
+    "assignedApis",
+    JSON.stringify(updatedAssignments)
+  );
+
+  toast.success("API Key generated successfully!");
+
+  window.location.reload();
+};
   return (
     <div>
       
@@ -76,11 +103,13 @@ console.log(filteredCollections);
       <div className="collections-grid">
   {filteredCollections.map((api) => {
 
-    const myPermission = assignedApis.find(
-      (a) =>
-        a.userEmail === user.email &&
-        a.apiId === api.id
-    )?.permission;
+    const myAssignment = assignedApis.find(
+  (a) =>
+    a.userEmail === user.email &&
+    a.apiId === api.id
+);
+
+const myPermission = myAssignment?.permission;
 
     return (
           <div className="collection-card" key={api.id}>
@@ -95,6 +124,60 @@ console.log(filteredCollections);
   <p>
     <b>Permission:</b> {myPermission}
   </p>
+)}
+{user?.role !== "Admin" && (
+  <div className="user-api-key-section">
+
+    {!myAssignment?.apiKey ? (
+      <button
+        className="collection-btn"
+        onClick={() => generateApiKey(api.id)}
+      >
+        Generate API Key
+      </button>
+    ) : (
+      <>
+        <label>API Key</label>
+
+        <div className="user-api-key-row">
+          <input
+            type={showKeys[api.id] ? "text" : "password"}
+            value={myAssignment.apiKey}
+            readOnly
+          />
+
+          <button
+            className="collection-btn"
+            onClick={() =>
+              setShowKeys((prev) => ({
+                ...prev,
+                [api.id]: !prev[api.id],
+              }))
+            }
+          >
+            {showKeys[api.id] ? "Hide" : "Show"}
+          </button>
+        </div>
+
+        <button
+          className="collection-btn"
+          onClick={async () => {
+  try {
+    await navigator.clipboard.writeText(
+      myAssignment.apiKey
+    );
+
+    toast.success("API Key copied to clipboard!");
+  } catch (error) {
+    toast.error("Failed to copy API Key.");
+  }
+}}
+        >
+          Copy Key
+        </button>
+      </>
+    )}
+    </div>
 )}
             <button className="collection-btn"
             onClick={() => {navigate(`/api/${api.id}/endpoints`)}}>

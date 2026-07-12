@@ -177,7 +177,7 @@ function Dashboard({user, apiCollections,systemOnline,setSystemOnline,activities
   Clear All
 </button>
 </div>
-  <div className={refreshing ? "activity-refresh" : ""}>
+  <div className={`activity-scroll-box${refreshing ? "activity-refresh" : ""}`}>
   {activities.length === 0 ? (
     <div className="empty-state">
       <h3>No Recent Activity</h3>
@@ -186,7 +186,7 @@ function Dashboard({user, apiCollections,systemOnline,setSystemOnline,activities
       </p>
     </div>
   ) : (
-    activities.slice(0, 5).map((activity) => (
+    activities.map((activity) => (
       <div
         className="activity-item"
         key={activity.id}
@@ -288,10 +288,12 @@ function Dashboard({user, apiCollections,systemOnline,setSystemOnline,activities
 
                 <br />
 
-                <small>
+               <small>
   {u.status === "Online"
     ? "Active Now"
-    : `Last seen: Today at ${new Date(u.lastSeen).toLocaleTimeString([], {
+    : `Last seen: ${new Date(u.lastSeen).toLocaleString([], {
+        day: "numeric",
+        month: "short",
         hour: "numeric",
         minute: "2-digit",
       })}`}
